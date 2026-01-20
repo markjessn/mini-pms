@@ -1,18 +1,26 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom';
+import { ApolloProvider } from '@apollo/client';
+import { client } from './graphql/client';
+import {
+  HomePage,
+  DashboardPage,
+  ProjectsPage,
+  ProjectDetailPage,
+  NotFoundPage,
+} from './pages';
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <ApolloProvider client={client}>
       <Routes>
-        <Route path="/" element={
-          <div className="p-8 text-center">
-            <h1 className="text-3xl font-bold text-gray-900">Mini PMS</h1>
-            <p className="mt-2 text-gray-600">Project setup complete. Ready for Phase 2.</p>
-          </div>
-        } />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/:orgSlug" element={<DashboardPage />} />
+        <Route path="/:orgSlug/projects" element={<ProjectsPage />} />
+        <Route path="/:orgSlug/projects/:projectId" element={<ProjectDetailPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
-    </div>
-  )
+    </ApolloProvider>
+  );
 }
 
-export default App
+export default App;
