@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Project, ProjectInput, ProjectStatus } from '../../types';
 import { Button, Input, Select } from '../ui';
+import { validateProjectForm, ValidationErrors } from '../../utils/validation';
 
 interface ProjectFormProps {
   project?: Project | null;
@@ -8,6 +9,7 @@ interface ProjectFormProps {
   onSubmit: (data: ProjectInput) => void;
   onCancel: () => void;
   loading?: boolean;
+  serverErrors?: string[];
 }
 
 const statusOptions = [
@@ -22,12 +24,14 @@ export function ProjectForm({
   onSubmit,
   onCancel,
   loading = false,
+  serverErrors = [],
 }: ProjectFormProps) {
   const [name, setName] = useState(project?.name || '');
   const [description, setDescription] = useState(project?.description || '');
   const [status, setStatus] = useState<ProjectStatus>(project?.status || 'ACTIVE');
   const [dueDate, setDueDate] = useState(project?.dueDate || '');
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<ValidationErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (project) {
@@ -38,18 +42,31 @@ export function ProjectForm({
     }
   }, [project]);
 
-  const validate = () => {
-    const newErrors: Record<string, string> = {};
-    if (!name.trim()) {
-      newErrors.name = 'Name is required';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const validateField = (field: string, value: string) => {
+    const data = {
+      name: field === 'name' ? value : name,
+      status: field === 'status' ? value : status,
+    };
+    const result = validateProjectForm(data);
+    setErrors((prev) => ({
+      ...prev,
+      [field]: result.errors[field] || '',
+    }));
+  };
+
+  const handleBlur = (field: string) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    validateField(field, name);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+
+    const result = validateProjectForm({ name, status });
+    setErrors(result.errors);
+    setTouched({ name: true, status: true });
+
+    if (!result.isValid) return;
 
     onSubmit({
       name: name.trim(),
@@ -62,11 +79,25 @@ export function ProjectForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {serverErrors.length > 0 && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+          <ul className="list-disc list-inside space-y-1">
+            {serverErrors.map((error, index) => (
+              <li key={index} className="text-sm">{error}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <Input
         label="Project Name"
         value={name}
-        onChange={(e) => setName(e.target.value)}
-        error={errors.name}
+        onChange={(e) => {
+          setName(e.target.value);
+          if (touched.name) validateField('name', e.target.value);
+        }}
+        onBlur={() => handleBlur('name')}
+        error={touched.name ? errors.name : undefined}
         placeholder="Enter project name"
         required
       />
