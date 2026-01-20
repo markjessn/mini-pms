@@ -60,17 +60,17 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Mini PMS</h1>
-          <p className="text-lg text-gray-600">
+      <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">Mini PMS</h1>
+          <p className="text-base sm:text-lg text-gray-600">
             A simple project management system
           </p>
         </div>
 
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <h2 className="text-xl font-semibold text-gray-900">Organizations</h2>
-          <Button onClick={() => setIsModalOpen(true)}>New Organization</Button>
+          <Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto">New Organization</Button>
         </div>
 
         {organizations.length === 0 ? (
