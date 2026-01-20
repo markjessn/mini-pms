@@ -35,11 +35,11 @@ class Query(graphene.ObjectType):
     )
 
     def resolve_organizations(self, info):
-        return Organization.objects.all()
+        return Organization.objects.prefetch_related('projects').all()
 
     def resolve_organization(self, info, slug):
         try:
-            return Organization.objects.get(slug=slug)
+            return Organization.objects.prefetch_related('projects').get(slug=slug)
         except Organization.DoesNotExist:
             return None
 
@@ -49,7 +49,7 @@ class Query(graphene.ObjectType):
         except Organization.DoesNotExist:
             return []
 
-        queryset = Project.objects.filter(organization=org)
+        queryset = Project.objects.filter(organization=org).select_related('organization').prefetch_related('tasks')
 
         if status:
             queryset = queryset.filter(status=status)
@@ -63,12 +63,12 @@ class Query(graphene.ObjectType):
 
     def resolve_project(self, info, id):
         try:
-            return Project.objects.get(pk=id)
+            return Project.objects.select_related('organization').prefetch_related('tasks').get(pk=id)
         except Project.DoesNotExist:
             return None
 
     def resolve_tasks(self, info, project_id, status=None, search=None, assignee_email=None):
-        queryset = Task.objects.filter(project_id=project_id)
+        queryset = Task.objects.filter(project_id=project_id).select_related('project').prefetch_related('comments')
 
         if status:
             queryset = queryset.filter(status=status)
@@ -85,7 +85,7 @@ class Query(graphene.ObjectType):
 
     def resolve_task(self, info, id):
         try:
-            return Task.objects.get(pk=id)
+            return Task.objects.select_related('project').prefetch_related('comments').get(pk=id)
         except Task.DoesNotExist:
             return None
 
