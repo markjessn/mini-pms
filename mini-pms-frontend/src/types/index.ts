@@ -81,3 +81,19 @@ export interface TaskFilters {
   search?: string;
   assigneeEmail?: string;
 }
+
+export interface ProjectStatistics {
+  totalProjects: number;
+  activeProjects: number;
+  completedProjects: number;
+  onHoldProjects: number;
+  totalTasks: number;
+  completedTasks: number;
+  overallCompletionRate: number;
+}
+
+export interface OrganizationInput {
+  name: string;
+  slug: string;
+  contactEmail: string;
+}
