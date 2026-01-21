@@ -97,3 +97,38 @@ export interface OrganizationInput {
   slug: string;
   contactEmail: string;
 }
+
+// User Types
+export type UserRole = 'ORG_ADMIN' | 'ORG_MEMBER';
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  organization: Organization | null;
+  role: UserRole;
+  isOrgAdmin: boolean;
+  isOrgMember: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RegisterInput {
+  email: string;
+  password: string;
+  name: string;
+  organizationName: string;
+  organizationSlug: string;
+}
+
+export interface LoginInput {
+  email: string;
+  password: string;
+}
+
+export interface CreateMemberInput {
+  email: string;
+  password: string;
+  name: string;
+}

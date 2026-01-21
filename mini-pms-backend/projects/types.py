@@ -1,6 +1,6 @@
 import graphene
 from graphene_django import DjangoObjectType
-from .models import Organization, Project, Task, TaskComment
+from .models import Organization, Project, Task, TaskComment, User
 
 
 class OrganizationType(DjangoObjectType):
@@ -84,3 +84,41 @@ class ProjectStatisticsType(graphene.ObjectType):
     total_tasks = graphene.Int()
     completed_tasks = graphene.Int()
     overall_completion_rate = graphene.Float()
+
+
+# User Types
+class UserType(DjangoObjectType):
+    is_org_admin = graphene.Boolean()
+    is_org_member = graphene.Boolean()
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'email', 'name', 'organization', 'role',
+            'is_active', 'created_at', 'updated_at'
+        ]
+
+    def resolve_is_org_admin(self, info):
+        return self.is_org_admin
+
+    def resolve_is_org_member(self, info):
+        return self.is_org_member
+
+
+class RegisterInput(graphene.InputObjectType):
+    email = graphene.String(required=True)
+    password = graphene.String(required=True)
+    name = graphene.String(required=True)
+    organization_name = graphene.String(required=True)
+    organization_slug = graphene.String(required=True)
+
+
+class LoginInput(graphene.InputObjectType):
+    email = graphene.String(required=True)
+    password = graphene.String(required=True)
+
+
+class CreateMemberInput(graphene.InputObjectType):
+    email = graphene.String(required=True)
+    password = graphene.String(required=True)
+    name = graphene.String(required=True)

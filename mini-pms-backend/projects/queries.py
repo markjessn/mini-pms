@@ -1,7 +1,7 @@
 import graphene
 from django.db.models import Q
-from .models import Organization, Project, Task
-from .types import OrganizationType, ProjectType, TaskType, ProjectStatisticsType
+from .models import Organization, Project, Task, User
+from .types import OrganizationType, ProjectType, TaskType, ProjectStatisticsType, UserType
 
 
 class Query(graphene.ObjectType):
@@ -32,6 +32,13 @@ class Query(graphene.ObjectType):
     project_statistics = graphene.Field(
         ProjectStatisticsType,
         organization_slug=graphene.String(required=True)
+    )
+
+    # Users
+    me = graphene.Field(UserType, email=graphene.String(required=True))
+    org_members = graphene.List(
+        UserType,
+        organization_id=graphene.ID(required=True)
     )
 
     def resolve_organizations(self, info):
@@ -110,3 +117,14 @@ class Query(graphene.ObjectType):
             completed_tasks=completed_tasks,
             overall_completion_rate=round((completed_tasks / total_tasks * 100), 1) if total_tasks > 0 else 0
         )
+
+    def resolve_me(self, info, email):
+        try:
+            return User.objects.select_related('organization').get(email=email.lower())
+        except User.DoesNotExist:
+            return None
+
+    def resolve_org_members(self, info, organization_id):
+        return User.objects.filter(
+            organization_id=organization_id
+        ).select_related('organization').order_by('name')

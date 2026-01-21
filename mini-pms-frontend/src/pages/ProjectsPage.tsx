@@ -48,7 +48,7 @@ export function ProjectsPage() {
 
   if (loading) {
     return (
-      <Layout organization={organization}>
+      <Layout organization={organization} orgSlug={orgSlug}>
         <LoadingOverlay />
       </Layout>
     );
@@ -62,7 +62,7 @@ export function ProjectsPage() {
   ];
 
   return (
-    <Layout organization={organization}>
+    <Layout organization={organization} orgSlug={orgSlug}>
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Projects</h1>

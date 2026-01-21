@@ -104,7 +104,7 @@ export function ProjectDetailPage() {
 
   if (projectLoading || tasksLoading) {
     return (
-      <Layout organization={organization}>
+      <Layout organization={organization} orgSlug={orgSlug}>
         <LoadingOverlay />
       </Layout>
     );
@@ -112,7 +112,7 @@ export function ProjectDetailPage() {
 
   if (!project) {
     return (
-      <Layout organization={organization}>
+      <Layout organization={organization} orgSlug={orgSlug}>
         <div className="text-center py-12">
           <h2 className="text-xl font-semibold text-gray-900">Project not found</h2>
           <Link to={`/${orgSlug}/projects`} className="text-blue-600 hover:text-blue-700 mt-2 inline-block">
@@ -131,7 +131,7 @@ export function ProjectDetailPage() {
   ];
 
   return (
-    <Layout organization={organization}>
+    <Layout organization={organization} orgSlug={orgSlug}>
       <div className="max-w-6xl mx-auto">
         {/* Breadcrumb */}
         <nav className="text-sm mb-4">

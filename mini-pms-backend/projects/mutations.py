@@ -1,8 +1,10 @@
 import graphene
-from django.db import IntegrityError
-from .models import Organization, Project, Task, TaskComment
-from .types import OrganizationType, ProjectType, TaskType, TaskCommentType
+from django.db import IntegrityError, transaction
+from django.contrib.auth import authenticate
+from .models import Organization, Project, Task, TaskComment, User
+from .types import OrganizationType, ProjectType, TaskType, TaskCommentType, UserType
 from .types import OrganizationInput, ProjectInput, TaskInput, TaskCommentInput
+from .types import RegisterInput, LoginInput, CreateMemberInput
 from .validators import (
     validate_organization_input,
     validate_project_input,
@@ -270,7 +272,170 @@ class DeleteTaskComment(graphene.Mutation):
             return DeleteTaskComment(success=False, errors=[str(e)])
 
 
+# Authentication Mutations
+class Register(graphene.Mutation):
+    """Register a new organization with an admin user."""
+    class Arguments:
+        input = RegisterInput(required=True)
+
+    user = graphene.Field(UserType)
+    organization = graphene.Field(OrganizationType)
+    success = graphene.Boolean()
+    errors = graphene.List(graphene.String)
+
+    def mutate(self, info, input):
+        errors = []
+
+        # Validate email
+        if not input.email or '@' not in input.email:
+            errors.append('Valid email is required.')
+        elif User.objects.filter(email=input.email.lower()).exists():
+            errors.append('Email already registered.')
+
+        # Validate password
+        if not input.password or len(input.password) < 6:
+            errors.append('Password must be at least 6 characters.')
+
+        # Validate name
+        if not input.name or len(input.name.strip()) < 2:
+            errors.append('Name must be at least 2 characters.')
+
+        # Validate organization name
+        if not input.organization_name or len(input.organization_name.strip()) < 2:
+            errors.append('Organization name must be at least 2 characters.')
+
+        # Validate organization slug
+        if not input.organization_slug:
+            errors.append('Organization slug is required.')
+        elif Organization.objects.filter(slug=input.organization_slug.lower()).exists():
+            errors.append('Organization slug already taken.')
+
+        if errors:
+            return Register(user=None, organization=None, success=False, errors=errors)
+
+        try:
+            with transaction.atomic():
+                # Create organization
+                org = Organization.objects.create(
+                    name=input.organization_name.strip(),
+                    slug=input.organization_slug.lower().strip(),
+                    contact_email=input.email.lower().strip()
+                )
+
+                # Create admin user
+                user = User.objects.create_user(
+                    email=input.email.lower().strip(),
+                    password=input.password,
+                    name=input.name.strip(),
+                    organization=org,
+                    role='ORG_ADMIN'
+                )
+
+                return Register(user=user, organization=org, success=True, errors=[])
+        except Exception as e:
+            return Register(user=None, organization=None, success=False, errors=[str(e)])
+
+
+class Login(graphene.Mutation):
+    """Login with email and password."""
+    class Arguments:
+        input = LoginInput(required=True)
+
+    user = graphene.Field(UserType)
+    success = graphene.Boolean()
+    errors = graphene.List(graphene.String)
+
+    def mutate(self, info, input):
+        if not input.email or not input.password:
+            return Login(user=None, success=False, errors=['Email and password required.'])
+
+        user = authenticate(email=input.email.lower(), password=input.password)
+
+        if user is None:
+            return Login(user=None, success=False, errors=['Invalid credentials.'])
+
+        if not user.is_active:
+            return Login(user=None, success=False, errors=['Account is disabled.'])
+
+        return Login(user=user, success=True, errors=[])
+
+
+class CreateOrgMember(graphene.Mutation):
+    """Create a new organization member (admin only)."""
+    class Arguments:
+        input = CreateMemberInput(required=True)
+        organization_id = graphene.ID(required=True)
+
+    user = graphene.Field(UserType)
+    success = graphene.Boolean()
+    errors = graphene.List(graphene.String)
+
+    def mutate(self, info, input, organization_id):
+        errors = []
+
+        # Validate email
+        if not input.email or '@' not in input.email:
+            errors.append('Valid email is required.')
+        elif User.objects.filter(email=input.email.lower()).exists():
+            errors.append('Email already registered.')
+
+        # Validate password
+        if not input.password or len(input.password) < 6:
+            errors.append('Password must be at least 6 characters.')
+
+        # Validate name
+        if not input.name or len(input.name.strip()) < 2:
+            errors.append('Name must be at least 2 characters.')
+
+        if errors:
+            return CreateOrgMember(user=None, success=False, errors=errors)
+
+        try:
+            org = Organization.objects.get(pk=organization_id)
+
+            user = User.objects.create_user(
+                email=input.email.lower().strip(),
+                password=input.password,
+                name=input.name.strip(),
+                organization=org,
+                role='ORG_MEMBER'
+            )
+
+            return CreateOrgMember(user=user, success=True, errors=[])
+        except Organization.DoesNotExist:
+            return CreateOrgMember(user=None, success=False, errors=['Organization not found.'])
+        except Exception as e:
+            return CreateOrgMember(user=None, success=False, errors=[str(e)])
+
+
+class DeleteOrgMember(graphene.Mutation):
+    """Delete an organization member (admin only)."""
+    class Arguments:
+        user_id = graphene.ID(required=True)
+
+    success = graphene.Boolean()
+    errors = graphene.List(graphene.String)
+
+    def mutate(self, info, user_id):
+        try:
+            user = User.objects.get(pk=user_id)
+            if user.role == 'ORG_ADMIN':
+                return DeleteOrgMember(success=False, errors=['Cannot delete org admin.'])
+            user.delete()
+            return DeleteOrgMember(success=True, errors=[])
+        except User.DoesNotExist:
+            return DeleteOrgMember(success=False, errors=['User not found.'])
+        except Exception as e:
+            return DeleteOrgMember(success=False, errors=[str(e)])
+
+
 class Mutation(graphene.ObjectType):
+    # Authentication mutations
+    register = Register.Field()
+    login = Login.Field()
+    create_org_member = CreateOrgMember.Field()
+    delete_org_member = DeleteOrgMember.Field()
+
     # Organization mutations
     create_organization = CreateOrganization.Field()
     update_organization = UpdateOrganization.Field()

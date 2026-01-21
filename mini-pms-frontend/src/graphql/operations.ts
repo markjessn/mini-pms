@@ -1,5 +1,117 @@
 import { gql } from '@apollo/client';
 
+// User/Auth Queries
+export const GET_ME = gql`
+  query GetMe($email: String!) {
+    me(email: $email) {
+      id
+      email
+      name
+      role
+      isOrgAdmin
+      isOrgMember
+      isActive
+      createdAt
+      organization {
+        id
+        name
+        slug
+        contactEmail
+      }
+    }
+  }
+`;
+
+export const GET_ORG_MEMBERS = gql`
+  query GetOrgMembers($organizationId: ID!) {
+    orgMembers(organizationId: $organizationId) {
+      id
+      email
+      name
+      role
+      isOrgAdmin
+      isOrgMember
+      isActive
+      createdAt
+    }
+  }
+`;
+
+// Auth Mutations
+export const REGISTER = gql`
+  mutation Register($input: RegisterInput!) {
+    register(input: $input) {
+      user {
+        id
+        email
+        name
+        role
+        isOrgAdmin
+        organization {
+          id
+          name
+          slug
+        }
+      }
+      organization {
+        id
+        name
+        slug
+      }
+      success
+      errors
+    }
+  }
+`;
+
+export const LOGIN = gql`
+  mutation Login($input: LoginInput!) {
+    login(input: $input) {
+      user {
+        id
+        email
+        name
+        role
+        isOrgAdmin
+        isOrgMember
+        organization {
+          id
+          name
+          slug
+        }
+      }
+      success
+      errors
+    }
+  }
+`;
+
+export const CREATE_ORG_MEMBER = gql`
+  mutation CreateOrgMember($input: CreateMemberInput!, $organizationId: ID!) {
+    createOrgMember(input: $input, organizationId: $organizationId) {
+      user {
+        id
+        email
+        name
+        role
+        isOrgAdmin
+        isOrgMember
+      }
+      success
+      errors
+    }
+  }
+`;
+
+export const DELETE_ORG_MEMBER = gql`
+  mutation DeleteOrgMember($userId: ID!) {
+    deleteOrgMember(userId: $userId) {
+      success
+      errors
+    }
+  }
+`;
+
 // Organization Queries
 export const GET_ORGANIZATIONS = gql`
   query GetOrganizations {

@@ -30,7 +30,7 @@ export function DashboardPage() {
 
   if (orgLoading || statsLoading) {
     return (
-      <Layout>
+      <Layout orgSlug={orgSlug}>
         <LoadingOverlay />
       </Layout>
     );
@@ -38,7 +38,7 @@ export function DashboardPage() {
 
   if (!organization) {
     return (
-      <Layout>
+      <Layout orgSlug={orgSlug}>
         <div className="text-center py-12">
           <h2 className="text-xl font-semibold text-gray-900">Organization not found</h2>
           <Link to="/" className="text-blue-600 hover:text-blue-700 mt-2 inline-block">
@@ -50,7 +50,7 @@ export function DashboardPage() {
   }
 
   return (
-    <Layout organization={organization}>
+    <Layout organization={organization} orgSlug={orgSlug}>
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
