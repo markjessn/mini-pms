@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useLazyQuery } from '@apollo/client/react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import type { ReactNode } from 'react';
+import { useApolloClient } from '@apollo/client/react';
 import { GET_ME } from '../graphql/operations';
 import type { User } from '../types';
 
@@ -19,33 +20,41 @@ const STORAGE_KEY = 'mini_pms_user_email';
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const initialized = useRef(false);
+  const client = useApolloClient();
 
-  const [fetchMe] = useLazyQuery(GET_ME, {
-    fetchPolicy: 'network-only',
-    onCompleted: (data) => {
+  const fetchUser = useCallback(async (email: string) => {
+    try {
+      const { data } = await client.query<{ me: User | null }>({
+        query: GET_ME,
+        variables: { email },
+        fetchPolicy: 'network-only',
+      });
       if (data?.me) {
         setUser(data.me);
       } else {
         localStorage.removeItem(STORAGE_KEY);
         setUser(null);
       }
-      setIsLoading(false);
-    },
-    onError: () => {
+    } catch {
       localStorage.removeItem(STORAGE_KEY);
       setUser(null);
+    } finally {
       setIsLoading(false);
-    },
-  });
+    }
+  }, [client]);
 
   useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+
     const storedEmail = localStorage.getItem(STORAGE_KEY);
     if (storedEmail) {
-      fetchMe({ variables: { email: storedEmail } });
+      fetchUser(storedEmail);
     } else {
       setIsLoading(false);
     }
-  }, [fetchMe]);
+  }, [fetchUser]);
 
   const login = (userData: User) => {
     setUser(userData);
@@ -57,12 +66,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(STORAGE_KEY);
   };
 
-  const refetchUser = () => {
+  const refetchUser = useCallback(() => {
     const storedEmail = localStorage.getItem(STORAGE_KEY);
     if (storedEmail) {
-      fetchMe({ variables: { email: storedEmail } });
+      fetchUser(storedEmail);
     }
-  };
+  }, [fetchUser]);
 
   return (
     <AuthContext.Provider

@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { useAuth } from '../../contexts/AuthContext';
+import { LoadingOverlay } from '../ui';
 import type { Organization } from '../../types';
 
 interface LayoutProps {
@@ -18,7 +19,7 @@ export function Layout({ children, organization, orgSlug }: LayoutProps) {
 
   // Wait for auth check to complete
   if (isLoading) {
-    return null;
+    return <LoadingOverlay />;
   }
 
   // Redirect to login if not authenticated
