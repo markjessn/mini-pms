@@ -6,10 +6,17 @@ Write-Host ""
 
 # Get the directory where the script is located
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$BackendDir = "$ScriptDir\mini-pms-backend"
+
+# Deactivate any existing virtual environment
+if ($env:VIRTUAL_ENV) {
+    Write-Host "Deactivating existing virtual environment..." -ForegroundColor Yellow
+    deactivate 2>$null
+}
 
 # Backend setup
 Write-Host "Setting up Backend..." -ForegroundColor Yellow
-Set-Location "$ScriptDir\mini-pms-backend"
+Set-Location $BackendDir
 
 # Check if venv exists
 if (-not (Test-Path "venv")) {
@@ -17,19 +24,19 @@ if (-not (Test-Path "venv")) {
     python -m venv venv
 }
 
-# Activate venv
-& ".\venv\Scripts\Activate.ps1"
+# Activate venv using absolute path
+& "$BackendDir\venv\Scripts\Activate.ps1"
 
-# Install dependencies
-pip install -r requirements.txt -q
+# Install dependencies using absolute path to pip
+& "$BackendDir\venv\Scripts\pip.exe" install -r requirements.txt -q
 
 # Run migrations
 Write-Host "Running migrations..." -ForegroundColor Yellow
-python manage.py migrate --run-syncdb
+& "$BackendDir\venv\Scripts\python.exe" manage.py migrate --run-syncdb
 
 # Start backend in a new window
 Write-Host "Starting Backend on http://localhost:8000" -ForegroundColor Green
-$backendJob = Start-Process -FilePath "python" -ArgumentList "manage.py runserver 8000" -PassThru -NoNewWindow
+$backendJob = Start-Process -FilePath "$BackendDir\venv\Scripts\python.exe" -ArgumentList "manage.py runserver 8000" -WorkingDirectory $BackendDir -PassThru -NoNewWindow
 
 # Frontend setup
 Write-Host ""
