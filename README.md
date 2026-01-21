@@ -30,7 +30,7 @@ A multi-tenant project management application built with Django, GraphQL, React,
 
 ## Prerequisites
 
-- Python 3.11+
+- Python 3.14+
 - Node.js 18+
 - PostgreSQL 14+
 

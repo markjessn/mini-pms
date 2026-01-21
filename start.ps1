@@ -7,60 +7,20 @@ Write-Host ""
 # Get the directory where the script is located
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $BackendDir = "$ScriptDir\mini-pms-backend"
+$FrontendDir = "$ScriptDir\mini-pms-frontend"
 
-# Deactivate any existing virtual environment
-if ($env:VIRTUAL_ENV) {
-    Write-Host "Deactivating existing virtual environment..." -ForegroundColor Yellow
-    deactivate 2>$null
-}
-
-# Backend setup
-Write-Host "Setting up Backend..." -ForegroundColor Yellow
-Set-Location $BackendDir
-
-# Check if venv exists
-if (-not (Test-Path "venv")) {
-    Write-Host "Creating virtual environment..." -ForegroundColor Yellow
-    python -m venv venv
-}
-
-# Activate venv using absolute path
-& "$BackendDir\venv\Scripts\Activate.ps1"
-
-# Install dependencies using absolute path to pip
-& "$BackendDir\venv\Scripts\pip.exe" install -r requirements.txt -q
-
-# Run migrations
-Write-Host "Running migrations..." -ForegroundColor Yellow
-& "$BackendDir\venv\Scripts\python.exe" manage.py migrate --run-syncdb
-
-# Start backend in a new window
-Write-Host "Starting Backend on http://localhost:8000" -ForegroundColor Green
+# Start backend
+Write-Host "Starting Backend..." -ForegroundColor Green
 $backendJob = Start-Process -FilePath "$BackendDir\venv\Scripts\python.exe" -ArgumentList "manage.py runserver 8000" -WorkingDirectory $BackendDir -PassThru -NoNewWindow
 
-# Frontend setup
-Write-Host ""
-Write-Host "Setting up Frontend..." -ForegroundColor Yellow
-Set-Location "$ScriptDir\mini-pms-frontend"
-
-# Check if node_modules exists
-if (-not (Test-Path "node_modules")) {
-    Write-Host "Installing npm dependencies..." -ForegroundColor Yellow
-    npm install
-}
-
-# Start frontend in a new window
-Write-Host "Starting Frontend on http://localhost:5173" -ForegroundColor Green
-$frontendJob = Start-Process -FilePath "npm" -ArgumentList "run dev" -PassThru -NoNewWindow
+# Start frontend
+Write-Host "Starting Frontend..." -ForegroundColor Green
+$frontendJob = Start-Process -FilePath "npm" -ArgumentList "run dev" -WorkingDirectory $FrontendDir -PassThru -NoNewWindow
 
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Green
 Write-Host "Mini PMS is running!" -ForegroundColor Green
 Write-Host "============================================" -ForegroundColor Green
-Write-Host ""
-Write-Host "Frontend: " -NoNewline; Write-Host "http://localhost:5173" -ForegroundColor Green
-Write-Host "Backend:  " -NoNewline; Write-Host "http://localhost:8000" -ForegroundColor Green
-Write-Host "GraphQL:  " -NoNewline; Write-Host "http://localhost:8000/graphql/" -ForegroundColor Green
 Write-Host ""
 Write-Host "Press Ctrl+C to stop both servers" -ForegroundColor Yellow
 
