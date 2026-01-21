@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { GET_ORGANIZATION, GET_PROJECT, GET_TASKS, CREATE_TASK, UPDATE_TASK, DELETE_TASK, DELETE_PROJECT } from '../graphql/operations';
-import type { Task, TaskInput, Organization, Project } from '../types';
+import type { Task, TaskInput, Organization, Project, TaskComment } from '../types';
 import { Layout } from '../components/layout';
-import { TaskBoard, TaskForm } from '../components/task';
+import { TaskBoard, TaskForm, TaskComments } from '../components/task';
 import { Button, Modal, StatusBadge, LoadingOverlay, SearchInput, Select } from '../components/ui';
 
 export function ProjectDetailPage() {
@@ -100,6 +100,12 @@ export function ProjectDetailPage() {
 
   const handleTaskClick = (task: Task) => {
     setSelectedTask(task);
+  };
+
+  const handleCommentsChange = (comments: TaskComment[]) => {
+    if (selectedTask) {
+      setSelectedTask({ ...selectedTask, comments });
+    }
   };
 
   if (projectLoading || tasksLoading) {
@@ -225,7 +231,7 @@ export function ProjectDetailPage() {
                 onCancel={() => setSelectedTask(null)}
                 loading={updating}
               />
-              <div className="mt-4 pt-4 border-t">
+              <div className="mt-4 pt-4 border-t flex justify-between items-center">
                 <Button
                   variant="danger"
                   size="sm"
@@ -234,6 +240,11 @@ export function ProjectDetailPage() {
                   Delete Task
                 </Button>
               </div>
+              <TaskComments
+                taskId={selectedTask.id}
+                comments={selectedTask.comments || []}
+                onCommentsChange={handleCommentsChange}
+              />
             </div>
           )}
         </Modal>

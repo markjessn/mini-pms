@@ -208,6 +208,12 @@ export const GET_TASKS = gql`
       assigneeEmail
       dueDate
       createdAt
+      comments {
+        id
+        content
+        authorEmail
+        createdAt
+      }
     }
   }
 `;
