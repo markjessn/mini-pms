@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { GET_ORGANIZATION, GET_PROJECT, GET_TASKS, CREATE_TASK, UPDATE_TASK, DELETE_TASK, DELETE_PROJECT } from '../graphql/operations';
-import type { Task, TaskInput, Organization, Project, TaskComment } from '../types';
+import type { Task, TaskInput, Organization, Project, TaskComment, TaskStatus } from '../types';
 import { Layout } from '../components/layout';
 import { TaskBoard, TaskForm, TaskComments } from '../components/task';
 import { Button, Modal, StatusBadge, LoadingOverlay, SearchInput, Select } from '../components/ui';
@@ -108,6 +108,33 @@ export function ProjectDetailPage() {
     }
   };
 
+  const handleTaskStatusChange = async (taskId: string, newStatus: TaskStatus) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    try {
+      const { data } = await updateTask({
+        variables: {
+          id: taskId,
+          input: {
+            title: task.title,
+            description: task.description,
+            status: newStatus,
+            assigneeEmail: task.assigneeEmail,
+            dueDate: task.dueDate,
+            projectId: projectId!,
+          },
+        },
+      });
+      if (data?.updateTask?.success) {
+        refetchTasks();
+        refetchProject();
+      }
+    } catch (error) {
+      console.error('Error updating task status:', error);
+    }
+  };
+
   if (projectLoading || tasksLoading) {
     return (
       <Layout organization={organization} orgSlug={orgSlug}>
@@ -198,7 +225,7 @@ export function ProjectDetailPage() {
           </div>
         </div>
 
-        <TaskBoard tasks={tasks} onTaskClick={handleTaskClick} />
+        <TaskBoard tasks={tasks} onTaskClick={handleTaskClick} onTaskStatusChange={handleTaskStatusChange} />
 
         {/* Create Task Modal */}
         <Modal

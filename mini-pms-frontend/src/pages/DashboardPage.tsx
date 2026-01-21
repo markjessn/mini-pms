@@ -59,7 +59,7 @@ export function DashboardPage() {
 
         {stats && <ProjectStats stats={stats} />}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <div className="mt-6">
           <Card>
             <CardBody>
               <div className="flex items-center justify-between mb-4">
@@ -96,22 +96,6 @@ export function DashboardPage() {
                   ))}
                 </ul>
               )}
-            </CardBody>
-          </Card>
-
-          <Card>
-            <CardBody>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-              <div className="space-y-3">
-                <Link to={`/${orgSlug}/projects`} className="block">
-                  <Button variant="secondary" className="w-full justify-start">
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                    </svg>
-                    View All Projects
-                  </Button>
-                </Link>
-              </div>
             </CardBody>
           </Card>
         </div>
