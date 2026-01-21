@@ -1,8 +1,8 @@
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client/react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GET_ORGANIZATIONS, CREATE_ORGANIZATION } from '../graphql/operations';
-import { Organization, OrganizationInput } from '../types';
+import type { Organization, OrganizationInput } from '../types';
 import { Button, Card, CardBody, Modal, Input, LoadingOverlay, EmptyState } from '../components/ui';
 
 export function HomePage() {
@@ -15,8 +15,8 @@ export function HomePage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { data, loading, refetch } = useQuery(GET_ORGANIZATIONS);
-  const [createOrganization, { loading: creating }] = useMutation(CREATE_ORGANIZATION);
+  const { data, loading, refetch } = useQuery<{ organizations: Organization[] }>(GET_ORGANIZATIONS);
+  const [createOrganization, { loading: creating }] = useMutation<{ createOrganization: { success: boolean; organization: Organization } }>(CREATE_ORGANIZATION);
 
   const organizations: Organization[] = data?.organizations || [];
 

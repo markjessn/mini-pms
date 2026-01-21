@@ -1,4 +1,4 @@
-import { TaskComment } from '../../types';
+import type { TaskComment } from '../../types';
 import { Button } from '../ui';
 
 interface CommentItemProps {

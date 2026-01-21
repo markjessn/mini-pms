@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
-import { ApolloProvider } from '@apollo/client';
+import { ApolloProvider } from '@apollo/client/react';
 import { client } from './graphql/client';
 import { ToastProvider, ErrorBoundary } from './components/ui';
 import {

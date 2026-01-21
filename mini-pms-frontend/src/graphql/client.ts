@@ -35,12 +35,12 @@ export const client = new ApolloClient({
       Query: {
         fields: {
           projects: {
-            merge(existing = [], incoming) {
+            merge(_existing = [], incoming) {
               return incoming;
             },
           },
           tasks: {
-            merge(existing = [], incoming) {
+            merge(_existing = [], incoming) {
               return incoming;
             },
           },

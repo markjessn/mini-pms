@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client/react';
 import { useParams } from 'react-router-dom';
 import { GET_ORGANIZATION, GET_PROJECTS, CREATE_PROJECT } from '../graphql/operations';
-import { ProjectInput, ProjectStatus } from '../types';
+import type { ProjectInput, Project, Organization } from '../types';
 import { Layout } from '../components/layout';
 import { ProjectList, ProjectForm } from '../components/project';
 import { Button, Modal, SearchInput, Select, LoadingOverlay } from '../components/ui';
@@ -13,12 +13,12 @@ export function ProjectsPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
-  const { data: orgData } = useQuery(GET_ORGANIZATION, {
+  const { data: orgData } = useQuery<{ organization: Organization }>(GET_ORGANIZATION, {
     variables: { slug: orgSlug },
     skip: !orgSlug,
   });
 
-  const { data, loading, refetch } = useQuery(GET_PROJECTS, {
+  const { data, loading, refetch } = useQuery<{ projects: Project[] }>(GET_PROJECTS, {
     variables: {
       organizationSlug: orgSlug,
       status: statusFilter || undefined,
@@ -27,7 +27,7 @@ export function ProjectsPage() {
     skip: !orgSlug,
   });
 
-  const [createProject, { loading: creating }] = useMutation(CREATE_PROJECT);
+  const [createProject, { loading: creating }] = useMutation<{ createProject: { success: boolean; project: Project } }>(CREATE_PROJECT);
 
   const organization = orgData?.organization;
   const projects = data?.projects || [];

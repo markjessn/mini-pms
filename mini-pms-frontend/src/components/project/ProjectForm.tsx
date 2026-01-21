@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Project, ProjectInput, ProjectStatus } from '../../types';
+import type { Project, ProjectInput, ProjectStatus } from '../../types';
 import { Button, Input, Select } from '../ui';
-import { validateProjectForm, ValidationErrors } from '../../utils/validation';
+import { validateProjectForm } from '../../utils/validation';
+import type { ValidationErrors } from '../../utils/validation';
 
 interface ProjectFormProps {
   project?: Project | null;

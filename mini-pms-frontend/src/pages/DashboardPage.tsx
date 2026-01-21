@@ -1,24 +1,25 @@
-import { useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 import { useParams, Link } from 'react-router-dom';
 import { GET_ORGANIZATION, GET_PROJECT_STATISTICS, GET_PROJECTS } from '../graphql/operations';
 import { Layout } from '../components/layout';
 import { ProjectStats } from '../components/project';
 import { Card, CardBody, LoadingOverlay, Button } from '../components/ui';
+import type { Organization, Project, ProjectStatistics } from '../types';
 
 export function DashboardPage() {
   const { orgSlug } = useParams<{ orgSlug: string }>();
 
-  const { data: orgData, loading: orgLoading } = useQuery(GET_ORGANIZATION, {
+  const { data: orgData, loading: orgLoading } = useQuery<{ organization: Organization }>(GET_ORGANIZATION, {
     variables: { slug: orgSlug },
     skip: !orgSlug,
   });
 
-  const { data: statsData, loading: statsLoading } = useQuery(GET_PROJECT_STATISTICS, {
+  const { data: statsData, loading: statsLoading } = useQuery<{ projectStatistics: ProjectStatistics }>(GET_PROJECT_STATISTICS, {
     variables: { organizationSlug: orgSlug },
     skip: !orgSlug,
   });
 
-  const { data: projectsData } = useQuery(GET_PROJECTS, {
+  const { data: projectsData } = useQuery<{ projects: Project[] }>(GET_PROJECTS, {
     variables: { organizationSlug: orgSlug },
     skip: !orgSlug,
   });

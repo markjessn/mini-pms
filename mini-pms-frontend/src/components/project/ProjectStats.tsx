@@ -1,4 +1,4 @@
-import { ProjectStatistics } from '../../types';
+import type { ProjectStatistics } from '../../types';
 import { Card, CardBody } from '../ui';
 
 interface ProjectStatsProps {

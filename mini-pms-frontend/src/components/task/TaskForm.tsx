@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Task, TaskInput, TaskStatus } from '../../types';
+import type { Task, TaskInput, TaskStatus } from '../../types';
 import { Button, Input, Select } from '../ui';
-import { validateTaskForm, ValidationErrors } from '../../utils/validation';
+import { validateTaskForm } from '../../utils/validation';
+import type { ValidationErrors } from '../../utils/validation';
 
 interface TaskFormProps {
   task?: Task | null;

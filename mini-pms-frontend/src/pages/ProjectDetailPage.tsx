@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client/react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { GET_ORGANIZATION, GET_PROJECT, GET_TASKS, CREATE_TASK, UPDATE_TASK, DELETE_TASK, UPDATE_PROJECT, DELETE_PROJECT } from '../graphql/operations';
-import { Task, TaskInput } from '../types';
+import { GET_ORGANIZATION, GET_PROJECT, GET_TASKS, CREATE_TASK, UPDATE_TASK, DELETE_TASK, DELETE_PROJECT } from '../graphql/operations';
+import type { Task, TaskInput, Organization, Project } from '../types';
 import { Layout } from '../components/layout';
 import { TaskBoard, TaskForm } from '../components/task';
 import { Button, Modal, StatusBadge, LoadingOverlay, SearchInput, Select } from '../components/ui';
@@ -15,17 +15,17 @@ export function ProjectDetailPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
-  const { data: orgData } = useQuery(GET_ORGANIZATION, {
+  const { data: orgData } = useQuery<{ organization: Organization }>(GET_ORGANIZATION, {
     variables: { slug: orgSlug },
     skip: !orgSlug,
   });
 
-  const { data: projectData, loading: projectLoading, refetch: refetchProject } = useQuery(GET_PROJECT, {
+  const { data: projectData, loading: projectLoading, refetch: refetchProject } = useQuery<{ project: Project }>(GET_PROJECT, {
     variables: { id: projectId },
     skip: !projectId,
   });
 
-  const { data: tasksData, loading: tasksLoading, refetch: refetchTasks } = useQuery(GET_TASKS, {
+  const { data: tasksData, loading: tasksLoading, refetch: refetchTasks } = useQuery<{ tasks: Task[] }>(GET_TASKS, {
     variables: {
       projectId,
       status: statusFilter || undefined,
@@ -34,10 +34,10 @@ export function ProjectDetailPage() {
     skip: !projectId,
   });
 
-  const [createTask, { loading: creating }] = useMutation(CREATE_TASK);
-  const [updateTask, { loading: updating }] = useMutation(UPDATE_TASK);
-  const [deleteTask] = useMutation(DELETE_TASK);
-  const [deleteProject] = useMutation(DELETE_PROJECT);
+  const [createTask, { loading: creating }] = useMutation<{ createTask: { success: boolean; task: Task } }>(CREATE_TASK);
+  const [updateTask, { loading: updating }] = useMutation<{ updateTask: { success: boolean; task: Task } }>(UPDATE_TASK);
+  const [deleteTask] = useMutation<{ deleteTask: { success: boolean } }>(DELETE_TASK);
+  const [deleteProject] = useMutation<{ deleteProject: { success: boolean } }>(DELETE_PROJECT);
 
   const organization = orgData?.organization;
   const project = projectData?.project;

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TaskCommentInput } from '../../types';
+import type { TaskCommentInput } from '../../types';
 import { Button } from '../ui';
 
 interface CommentFormProps {

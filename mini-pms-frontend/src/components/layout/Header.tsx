@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Organization } from '../../types';
+import type { Organization } from '../../types';
 
 interface HeaderProps {
   organization?: Organization | null;

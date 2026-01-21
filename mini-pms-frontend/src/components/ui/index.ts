@@ -7,5 +7,6 @@ export { Card, CardHeader, CardBody, CardFooter } from './Card';
 export { LoadingSpinner, LoadingOverlay } from './LoadingSpinner';
 export { EmptyState } from './EmptyState';
 export { SearchInput } from './SearchInput';
-export { Toast, ToastProvider, useToast } from './Toast';
+export { ToastProvider, useToast, ToastContainer } from './Toast';
+export type { Toast, ToastType } from './Toast';
 export { ErrorBoundary } from './ErrorBoundary';
